@@ -1,0 +1,23 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+@model Contact
+<div class="text-center">
+    <h1 class="display-4">Contact Form Example</h1>
+</div>
+<form asp-action="SendEmail" asp-controller="Home" method="POST">
+    <label asp-for="FirstName" class></label>
+    <span asp-validation-for="FirstName"></span>
+    <input asp-for="FirstName" class="form-control">
+    <label asp-for="LastName"></label>
+    <span asp-validation-for="LastName"></span>
+    <input asp-for="LastName" class="form-control">
+    <label asp-for="Email"></label>
+    <span asp-validation-for="Email"></span>
+    <input asp-for="Email" class="form-control">
+    <label asp-for="Message"></label>
+    <span asp-validation-for="Message"></span>
+    <input asp-for="Message" class="form-control">
+    <br>
+    <input type="submit" value="Send Message" class="btn btn-primary">
+</form>
