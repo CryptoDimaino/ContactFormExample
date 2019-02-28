@@ -2,7 +2,7 @@
 
 Simple Contact form that uses the MailMessage and SmtpClient to send an email message to the setup variables in appsettings.json.
 
-appsettings.json
+## appsettings.json
 {
   "Logging": {
     "LogLevel": {
