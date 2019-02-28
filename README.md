@@ -3,7 +3,7 @@
 Simple Contact form that uses the MailMessage and SmtpClient to send an email message to the setup variables in appsettings.json.
 
 ## appsettings.json
-'''javascript
+```javascript
 {
   "Logging": {
     "LogLevel": {
@@ -19,7 +19,7 @@ Simple Contact form that uses the MailMessage and SmtpClient to send an email me
     "Port": 587
   }
 }
-'''
+```
 
 Nuget Package:
 dotnet add package Microsoft.Extensions.Configuration.Binder --version 2.2.0
