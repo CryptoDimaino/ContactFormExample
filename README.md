@@ -21,5 +21,5 @@ Simple Contact form that uses the MailMessage and SmtpClient to send an email me
 }
 ```
 
-Nuget Package:
+## Nuget Package:
 dotnet add package Microsoft.Extensions.Configuration.Binder --version 2.2.0
