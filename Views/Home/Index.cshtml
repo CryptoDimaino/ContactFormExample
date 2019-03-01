@@ -5,6 +5,10 @@
 <div class="text-center">
     <h1 class="display-4">Contact Form Example</h1>
 </div>
+@if(ViewBag.AppSettingsExists != null)
+{
+    <h3>@ViewBag.AppSettingsExists</h3>
+}
 <form asp-action="SendEmail" asp-controller="Home" method="POST">
     <label asp-for="FirstName" class></label>
     <span asp-validation-for="FirstName"></span>
