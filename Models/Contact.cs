@@ -13,7 +13,7 @@ namespace ContactFormExample.Models
         [Required]
         [Display(Name = "Email: ")]
         [EmailAddress(ErrorMessage = "Invalid Email Address")]
-        public string Email {get;set;}
+        public string Email1 {get;set;}
         [Required]
         [Display(Name = "Message: ")]
         public string Message {get;set;}

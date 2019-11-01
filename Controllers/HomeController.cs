@@ -10,6 +10,7 @@ using System.Net.Mail;
 using Microsoft.Extensions.Options;
 using System.Reflection;
 using Microsoft.AspNetCore.Hosting;
+using System.Net;
 
 namespace ContactFormExample.Controllers
 {
@@ -69,7 +70,7 @@ namespace ContactFormExample.Controllers
                     return View("Index");
                 }
 
-                bool EmailSent = SendMail(contact.FullName, contact.Email, contact.Message, Config.Value.EmailAddress, Config.Value.AccountName, Config.Value.SmtpClientAddress, Config.Value.Password, Config.Value.Port);
+                bool EmailSent = SendMail(contact.FullName, contact.Email1, contact.Message, Config.Value.EmailAddress, Config.Value.AccountName, Config.Value.SmtpClientAddress, Config.Value.Password, Config.Value.Port);
                 if(!EmailSent)
                 {
                     ModelState.AddModelError("Email", "The form was not sent because of an invalid email address.");
@@ -80,37 +81,52 @@ namespace ContactFormExample.Controllers
             return View("Index");
         }
 
-        private bool SendMail(string Name, string EmailAddress, string Message, string ConfigEmail, string AccountName, string SmtpClientAddress, string ConfigPassword, int Port)
+        private bool SendMail(string Name, string Email1, string Message, string ConfigEmail, string AccountName, string SmtpClientAddress, string ConfigPassword, int Port)
         {
+            Console.WriteLine(Email1);
             bool sent = true;
-            using(MailMessage  Email = new MailMessage())
+            using(MailMessage Email = new MailMessage())
             {
-                Email.From = new MailAddress(EmailAddress, Name);
+                Email.From = new MailAddress(Email1, Name);
                 Email.To.Add(new MailAddress(ConfigEmail, AccountName));
-                Email.Subject = $"Send from contact form";
+                Email.Subject = $"Contact Form - dimaino.com - {Email1}";
                 Email.Body = Message;
-                Email.Priority = MailPriority.Normal;
+                Email.Priority = MailPriority.High;
+                Email.IsBodyHtml = true;
 
-                SmtpClient MailClient = null;
-                try
+                // SmtpClient MailClient = null;
+                // SmtpClient MailClient = new SmtpClient();
+                using (var MailClient = new SmtpClient(Config.Value.SmtpClientAddress))
                 {
-                    MailClient = new SmtpClient(SmtpClientAddress, Port);
+                    MailClient.Port = 587;
+                    MailClient.Credentials = new NetworkCredential(ConfigEmail, ConfigPassword);
                     MailClient.EnableSsl = true;
-                    MailClient.Credentials = new System.Net.NetworkCredential(ConfigEmail, ConfigPassword);
                     MailClient.Send(Email);
                 }
-                catch(SmtpException ex)
-                {
-                    Console.WriteLine(ex);
-                    sent = false;
-                }
-                finally
-                {
-                    if(MailClient is IDisposable)
-                    {
-                        MailClient.Dispose();
-                    }
-                }
+                // try
+                // {
+                //     // MailClient = new SmtpClient(SmtpClientAddress, Port);
+                //     MailClient.Credentials = new NetworkCredential(ConfigEmail, ConfigPassword, Config.Value.SmtpClientAddress);
+                //     MailClient.Host = Config.Value.SmtpClientAddress;
+                //     MailClient.Port = Port;
+                //     MailClient.DeliveryMethod = SmtpDeliveryMethod.Network;
+                //     MailClient.EnableSsl = true;
+                //     MailClient.UseDefaultCredentials = false;
+                //     // MailClient.Credentials = new System.Net.NetworkCredential(ConfigEmail, ConfigPassword, Config.Value.SmtpClientAddress);
+                //     MailClient.Send(Email);
+                // }
+                // catch(SmtpException ex)
+                // {
+                //     Console.WriteLine(ex);
+                //     sent = false;
+                // }
+                // finally
+                // {
+                //     if(MailClient is IDisposable)
+                //     {
+                //         MailClient.Dispose();
+                //     }
+                // }
             }
             return sent;
         }
