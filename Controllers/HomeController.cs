@@ -58,6 +58,8 @@ namespace ContactFormExample.Controllers
             return Config.Value.Port;
         }
 
+        // Sends an email as long as the modelstate is true. Then calls the SendMail Method and reads in important information 
+        // that was recieved from the model form. It also reads in important information from the appsettings.json file.
         [HttpPost("SendEmail")]
         public IActionResult SendEmail(Contact contact)
         {
@@ -71,6 +73,7 @@ namespace ContactFormExample.Controllers
                 }
 
                 bool EmailSent = SendMail(contact.FullName, contact.Email1, contact.Message, Config.Value.EmailAddress, Config.Value.AccountName, Config.Value.SmtpClientAddress, Config.Value.Password, Config.Value.Port);
+                SendMailToSender(contact.FullName, contact.Email1, contact.Message, Config.Value.EmailAddress, Config.Value.AccountName, Config.Value.SmtpClientAddress, Config.Value.Password, Config.Value.Port);
                 if(!EmailSent)
                 {
                     ModelState.AddModelError("Email", "The form was not sent because of an invalid email address.");
@@ -81,54 +84,75 @@ namespace ContactFormExample.Controllers
             return View("Index");
         }
 
+        // This is a private method that tries to deliver an email to the host provided information with the person trying to contact the webhost.
         private bool SendMail(string Name, string Email1, string Message, string ConfigEmail, string AccountName, string SmtpClientAddress, string ConfigPassword, int Port)
         {
-            Console.WriteLine(Email1);
+            string websiteName = ".com";
             bool sent = true;
             using(MailMessage Email = new MailMessage())
             {
                 Email.From = new MailAddress(Email1, Name);
                 Email.To.Add(new MailAddress(ConfigEmail, AccountName));
-                Email.Subject = $"Contact Form - dimaino.com - {Email1}";
+                Email.Subject = $"Contact Form - {websiteName} - {Email1}";
                 Email.Body = Message;
                 Email.Priority = MailPriority.High;
                 Email.IsBodyHtml = true;
 
-                // SmtpClient MailClient = null;
-                // SmtpClient MailClient = new SmtpClient();
-                using (var MailClient = new SmtpClient(Config.Value.SmtpClientAddress))
+                try
                 {
-                    MailClient.Port = 587;
-                    MailClient.Credentials = new NetworkCredential(ConfigEmail, ConfigPassword);
-                    MailClient.EnableSsl = true;
-                    MailClient.Send(Email);
+                    using (var MailClient = new SmtpClient(SmtpClientAddress))
+                    {
+                        MailClient.Port = 587;
+                        MailClient.Credentials = new NetworkCredential(ConfigEmail, ConfigPassword);
+                        MailClient.DeliveryMethod = SmtpDeliveryMethod.Network;
+                        MailClient.EnableSsl = true;
+                        MailClient.Send(Email);
+                    }
                 }
-                // try
-                // {
-                //     // MailClient = new SmtpClient(SmtpClientAddress, Port);
-                //     MailClient.Credentials = new NetworkCredential(ConfigEmail, ConfigPassword, Config.Value.SmtpClientAddress);
-                //     MailClient.Host = Config.Value.SmtpClientAddress;
-                //     MailClient.Port = Port;
-                //     MailClient.DeliveryMethod = SmtpDeliveryMethod.Network;
-                //     MailClient.EnableSsl = true;
-                //     MailClient.UseDefaultCredentials = false;
-                //     // MailClient.Credentials = new System.Net.NetworkCredential(ConfigEmail, ConfigPassword, Config.Value.SmtpClientAddress);
-                //     MailClient.Send(Email);
-                // }
-                // catch(SmtpException ex)
-                // {
-                //     Console.WriteLine(ex);
-                //     sent = false;
-                // }
-                // finally
-                // {
-                //     if(MailClient is IDisposable)
-                //     {
-                //         MailClient.Dispose();
-                //     }
-                // }
+                catch(SmtpException ex)
+                {
+                    Console.WriteLine(ex);
+                    sent = false;
+                }
             }
             return sent;
         }
+
+        private bool SendMailToSender(string Name, string Email1, string Message, string ConfigEmail, string AccountName, string SmtpClientAddress, string ConfigPassword, int Port)
+        {
+            bool sent = true;
+            using(MailMessage Email = new MailMessage())
+            {
+                Email.From = new MailAddress(ConfigEmail, AccountName);
+                Email.To.Add(new MailAddress(Email1, Name));
+                Email.Subject = $"Automated Reply from .com";
+                Email.Body = "<h1 \"style=text-align: center;\">Automated reply from .com</h1>" + 
+                "<br>" +
+                $"<p>Hello {Name}, thanks so much for reaching out! I will respond to your email as soon as I " +
+                "am able to see it.</p>" +
+                "<br>" +
+                "<p>If you did not use the contact me feature on .com please ignore this email.</p>";
+                Email.Priority = MailPriority.High;
+                Email.IsBodyHtml = true;
+
+                try
+                {
+                    using (var MailClient = new SmtpClient(SmtpClientAddress))
+                    {
+                        MailClient.Port = 587;
+                        MailClient.Credentials = new NetworkCredential(ConfigEmail, ConfigPassword);
+                        MailClient.DeliveryMethod = SmtpDeliveryMethod.Network;
+                        MailClient.EnableSsl = true;
+                        MailClient.Send(Email);
+                    }
+                }
+                catch(SmtpException ex)
+                {
+                    Console.WriteLine(ex);
+                    sent = false;
+                }
+            }
+            return sent;
+        }        
     }
 }
